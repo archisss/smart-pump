@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Edit Profile</title>
+        <link rel="stylesheet" href="styles.css" />
+        <!-- Agregar la librería Inputmask -->
+        <script src="https://cdn.jsdelivr.net/npm/inputmask/dist/inputmask.min.js"></script>
+    </head>
+    <body>
+        <div class="edit-container">
+            <h2>Edit Your Profile</h2>
+            <form id="editForm">
+                <input
+                    type="text"
+                    id="firstName"
+                    placeholder="First Name"
+                    required
+                />
+                <input
+                    type="text"
+                    id="lastName"
+                    placeholder="Last Name"
+                    required
+                />
+                <input type="number" id="age" placeholder="Age" />
+                <input type="text" id="eyeColor" placeholder="EyeColor" />
+                <input type="text" id="company" placeholder="Company" />
+                <input type="text" id="phone" placeholder="Phone" />
+                <input type="text" id="address" placeholder="Address" />
+                <input type="email" id="email" placeholder="Email" required />
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
+
+        <script>
+            // Expresión regular para validar el formato de teléfono
+            const phoneRegex = /^\+1 \(\d{3}\) \d{3}-\d{4}$/;
+
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (user) {
+                // Rellenar los campos del formulario con los datos del usuario
+                document.getElementById("firstName").value = user.name.first;
+                document.getElementById("lastName").value = user.name.last;
+                document.getElementById("age").value = user.age;
+                document.getElementById("eyeColor").value = user.eyeColor;
+                document.getElementById("company").value = user.company;
+                document.getElementById("phone").value = user.phone;
+                document.getElementById("address").value = user.address;
+                document.getElementById("email").value = user.email;
+
+                // Agregar Inputmask para el formato de teléfono
+                const phoneInput = document.getElementById("phone");
+                const im = new Inputmask("+1 (999) 999-9999");
+                im.mask(phoneInput);
+
+                // Validar y enviar los datos del formulario
+                document
+                    .getElementById("editForm")
+                    .addEventListener("submit", function (event) {
+                        event.preventDefault();
+
+                        const updatedUser = {
+                            name: {
+                                first: document.getElementById("firstName")
+                                    .value,
+                                last: document.getElementById("lastName").value,
+                            },
+                            age: document.getElementById("age").value,
+                            eyeColor: document.getElementById("eyeColor").value,
+                            company: document.getElementById("company").value,
+                            phone: document.getElementById("phone").value,
+                            address: document.getElementById("address").value,
+                            email: document.getElementById("email").value,
+                        };
+
+                        // Validar el número de teléfono antes de enviar
+                        if (!phoneRegex.test(updatedUser.phone)) {
+                            alert(
+                                "Invalid phone number. Please use the format +1 (800) 433-3997."
+                            );
+                            return; // Detener el envío si el teléfono no es válido
+                        }
+
+                        fetch(
+                            `http://localhost:3000/api/users/profile/${user._id}`,
+                            {
+                                method: "PUT",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify(updatedUser),
+                            }
+                        )
+                            .then((res) => res.json())
+                            .then((data) => {
+                                if (data.message) {
+                                    alert(data.message);
+                                    localStorage.setItem(
+                                        "user",
+                                        JSON.stringify({
+                                            ...user,
+                                            ...updatedUser,
+                                        })
+                                    );
+                                    window.location.href = "/profile.html";
+                                }
+                            })
+                            .catch((err) => alert("Failed to save changes"));
+                    });
+            } else {
+                window.location.href = "/";
+            }
+        </script>
+    </body>
+</html>

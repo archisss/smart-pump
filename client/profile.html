@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>User Profile</title>
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+
+    <body>
+        <div class="profile-container">
+            <img
+                id="profilePicture"
+                src="/assets/picture.jpg"
+                alt="Profile Picture"
+                class="profile-img"
+            />
+            <h2 id="name"></h2>
+            <button id="balanceBtn" disabled>Balance</button>
+            <button id="editBtn">Edit</button>
+        </div>
+
+        <script>
+            const user = JSON.parse(localStorage.getItem("user"));
+            if (user) {
+                document.getElementById("profilePicture").src = user.picture;
+                document.getElementById(
+                    "name"
+                ).textContent = `${user.name.first} ${user.name.last}`;
+
+                if (user.isActive) {
+                    document.getElementById("balanceBtn").disabled = false;
+                    document
+                        .getElementById("balanceBtn")
+                        .addEventListener("click", function () {
+                            alert(`Your balance: ${user.balance}`);
+                        });
+                }
+
+                document
+                    .getElementById("editBtn")
+                    .addEventListener("click", function () {
+                        window.location.href = "/edit.html";
+                    });
+            } else {
+                window.location.href = "/";
+            }
+        </script>
+    </body>
+</html>
